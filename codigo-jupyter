@@ -1,0 +1,535 @@
+#Código manejo de datos en jupyter
+
+#EXTRACCION
+from sodapy import Socrata
+
+#VISUALIZACION
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import plotly.express as px
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.cm as cm
+from scipy.optimize import curve_fit
+import datetime 
+import folium
+from folium import Choropleth, Circle, Marker
+from folium.plugins import HeatMap, MarkerCluster
+import math  
+import requests
+
+#MANEJO DE TABLAS Y DATOS
+import pandas as pd
+import numpy as np
+
+client = Socrata("www.datos.gov.co","S7PcPaCGni4kPjVlznj8gAI2Y",
+                  username="johan.manjarres@correo.usa.edu.co",
+                  password="*********")
+
+limite=40000
+results = client.get("gt2j-8ykr", limit=limite)
+df_result = pd.DataFrame.from_records(results)
+
+df_result['casos'] = 1
+
+df_result['lat']=df_result['departamento']
+df_result['lat'].replace({'Bogotá D.C.':4.6097102,'Valle del Cauca':3.5833299,'Antioquia':6.1759100,
+                      'Cartagena D.T. y C.':10.3997202,'Huila':1.8537101,'Meta':3.9869499,
+                      'Atlántico':10.8595304,'Barranquilla D.E.':10.9685402,'Risaralda':4.8391600,
+                      'Norte de Santander':8.2377300,'Caldas':5.4478302,'Cundinamarca': 4.7163801,
+                      'Amazonas':-4.2081000,'Nariño':0.8301800,'Santa Marta D.T. y C.':11.2407904,
+                      'Tolima':4.1492400,'Magdalena':11.0070295,'Cesar':8.8170000,
+                      'Quindío':4.5294900,'Boyacá':5.5352803,'Santander':7.1253901,
+                      'Buenaventura D.E.':3.5394399,'Cauca':2.4382300,'Bolívar':9.2420197,
+                      'Córdoba':8.7479801,'Chocó':5.6918802,'Casanare':5.3377500,
+                      'La Guajira':11.5444403,'Caquetá':1.6143800,'Arauca':7.0847100,
+                      'Archipiélago de San Andrés Providencia y Santa Catalina':12.5847197,
+                      'Sucre':9.3047199,'Putumayo':1.1493300,'Vaupés':0.9723900,'Guainía':3.867,
+                      'Vichada':4.455951,'Guaviare':2.5728600},inplace=True)
+
+df_result['lon']=df_result['departamento']
+df_result['lon'].replace({'Bogotá D.C.':-74.0817490,'Valle del Cauca':-77.0000000,'Antioquia':-75.5917435,
+                      'Cartagena D.T. y C.':-75.5144424,'Huila':-76.0507126,'Meta':-73.7579727,
+                      'Atlántico':-74.7738571,'Barranquilla D.E.':-74.7813187,'Risaralda':-75.6672668,
+                      'Norte de Santander':-73.3560410,'Caldas':-74.6631088,'Cundinamarca': -74.2119522,
+                      'Amazonas':-69.9432000,'Nariño':-77.6495895,'Santa Marta D.T. y C.':-74.1990433,
+                      'Tolima':-74.8842926,'Magdalena':-74.2476501,'Cesar':-74.7170000,
+                      'Quindío':-75.6409073,'Boyacá':-73.3677826,'Santander':-73.1197968,
+                      'Buenaventura D.E.':-76.3036118,'Cauca':-76.6131592,'Bolívar':-74.7546692,
+                      'Córdoba':-75.8814316,'Chocó':-76.6583481,'Casanare':-72.3958588,
+                      'La Guajira':-72.9072189,'Caquetá':-75.6062317,'Arauca':-70.7590800,
+                      'Archipiélago de San Andrés Providencia y Santa Catalina':-81.7005615,
+                      'Sucre':-75.3977814,'Putumayo':-76.6466100,'Vaupés':-70.4063500,'Guainía':-67.917,
+                      'Vichada':-69.290771,'Guaviare':-72.6459100},inplace=True)
+
+casos_bogota=df_result.query('departamento=="Bogotá D.C."')
+b = casos_bogota.shape[0]
+casos_cauca=df_result.query('departamento=="Valle del Cauca"')
+v = casos_cauca.shape[0]
+casos_Meta=df_result.query('departamento=="Meta"')
+m = casos_cauca.shape[0]
+casos_antioquia=df_result.query('departamento=="Antioquia"')
+a = casos_antioquia.shape[0]
+casos_cartagena=df_result.query('departamento=="Cartagena D.T. y C."')
+c = casos_cartagena.shape[0]
+casos_atlantico=df_result.query('departamento=="Atlántico"')
+a1 = casos_atlantico.shape[0]
+casos_barranquilla=df_result.query('departamento=="Barranquilla D.E."')
+b1 = casos_barranquilla.shape[0]
+casos_cundinamarca=df_result.query('departamento=="Cundinamarca"')
+c1 = casos_cundinamarca.shape[0]
+casos_amazonas=df_result.query('departamento=="Amazonas"')
+a2 = casos_amazonas.shape[0]
+casos_risaralda=df_result.query('departamento=="Risaralda"')
+r = casos_risaralda.shape[0]
+casos_narino=df_result.query('departamento=="Nariño"')
+n = casos_narino.shape[0]
+casos_santa_marta=df_result.query('departamento=="Santa Marta D.T. y C."')
+s = casos_santa_marta.shape[0]
+casos_huila=df_result.query('departamento=="Huila"')
+h = casos_huila.shape[0]
+casos_tolima=df_result.query('departamento=="Tolima"')
+t = casos_tolima.shape[0]
+casos_huila=df_result.query('departamento=="Norte de Santander"')
+n1 = casos_huila.shape[0]
+casos_caldas=df_result.query('departamento=="Caldas"')
+c2 = casos_caldas.shape[0]
+casos_magdalena=df_result.query('departamento=="Magdalena"')
+m1 = casos_magdalena.shape[0]
+casos_cesar=df_result.query('departamento=="Cesar"')
+c3 = casos_cesar.shape[0]
+casos_quindio=df_result.query('departamento=="Quindio"')
+q = casos_quindio.shape[0]
+casos_boyaca=df_result.query('departamento=="Boyacá"')
+b2 = casos_boyaca.shape[0]
+casos_santander=df_result.query('departamento=="Santander"')
+s1 = casos_santander.shape[0]
+casos_buenaventura=df_result.query('departamento=="Buenaventura D.E."')
+b3 = casos_buenaventura.shape[0]
+casos_cauca=df_result.query('departamento=="Cauca"')
+c4 = casos_cauca.shape[0]
+casos_bolivar=df_result.query('departamento=="Bolívar"')
+b4 = casos_bolivar.shape[0]
+casos_cordoba=df_result.query('departamento=="Córdoba"')
+c5 = casos_cordoba.shape[0]
+casos_choco=df_result.query('departamento=="Chocó"')
+c6 = casos_choco.shape[0]
+casos_casanare=df_result.query('departamento=="Casanare"')
+c7 = casos_casanare.shape[0]
+casos_guajira=df_result.query('departamento=="La Guajira"')
+g = casos_guajira.shape[0]
+casos_caqueta=df_result.query('departamento=="Caquetá"')
+c8 = casos_caqueta.shape[0]
+casos_caqueta=df_result.query('departamento=="Archipiélago de San Andrés Providencia y Santa Catalina"')
+sp = casos_caqueta.shape[0]
+casos_sucre=df_result.query('departamento=="Sucre"')
+s2 = casos_sucre.shape[0]
+casos_arauca=df_result.query('departamento=="Arauca"')
+a3 = casos_arauca.shape[0]
+casos_putumayo=df_result.query('departamento=="Putumayo"')
+put = casos_putumayo.shape[0]
+casos_Vaupés=df_result.query('departamento=="Vaupés"')
+vap = casos_Vaupés.shape[0]
+casos_guainia=df_result.query('departamento=="Guainía"')
+gua = casos_guainia.shape[0]
+casos_vichada=df_result.query('departamento=="Vichada"')
+vch = casos_vichada.shape[0]
+casos_guaviare=df_result.query('departamento=="Guaviare"')
+gvi = casos_guaviare.shape[0]
+
+df_result['casos_totales'] = df_result['departamento']
+df_result['casos_totales'].replace({'Bogotá D.C.':b,'Valle del Cauca':v,'Meta':m,'Antioquia':a,'Cartagena D.T. y C.':c,
+                                   'Atlántico':a1,'Barranquilla D.E.':b1,'Cundinamarca':c1,'Amazonas':a2,'Risaralda':r,
+                                   'Nariño':n,'Santa Marta D.T. y C.':s,'Huila':h,'Tolima':t,'Norte de Santander':n1,
+                                   'Caldas':c2,'Magdalena':m1,'Cesar':c3,'Quindío':q,'Boyacá':b2,'Santander':s1,
+                                   'Buenaventura D.E.':b3,'Cauca':c4,'Bolívar':b4,'Córdoba':c5,'Chocó':c6,'Casanare':c7,
+                                   'La Guajira':g,'Caquetá':c8,'Archipiélago de San Andrés Providencia y Santa Catalina':sp,
+                                   'Sucre':s2,'Arauca':a3,'Putumayo':put,'Vaupés':vap,'Guainía':gua,'Vichada':vch,
+                                   'Guaviare':gvi}, inplace=True)
+
+df_result['fecha_de_notificaci_n']=df_result['fecha_de_notificaci_n'].map(lambda x:str(x)[:-13])
+df_result['fecha_de_muerte']=df_result['fecha_de_muerte'].dropna(how='any').map(lambda x:str(x)[:-13])
+df_result['fecha_diagnostico']=df_result['fecha_diagnostico'].map(lambda x:str(x)[:-13])
+df_result['fecha_recuperado']=df_result['fecha_recuperado'].map(lambda x:str(x)[:-13])
+df_result['fecha_reporte_web']=df_result['fecha_reporte_web'].map(lambda x:str(x)[:-13])
+
+df_result.to_excel("data.xlsx",sheet_name="datos")
+
+df=pd.read_excel('data.xlsx') 
+
+anim=df.groupby(['departamento','fecha_diagnostico']).count()
+b=anim.iloc[:,0]
+
+depart=["Bogotá D.C.","Valle del Cauca","Meta","Antioquia","Cartagena D.T. y C.","Atlántico","Barranquilla D.E.",
+        "Cundinamarca","Amazonas","Risaralda","Nariño","Santa Marta D.T. y C.","Huila","Tolima","Norte de Santander",
+        "Caldas","Magdalena","Cesar","Quindío","Boyacá","Santander","Buenaventura D.E.","Cauca","Bolívar","Córdoba",
+        "Chocó","Casanare","La Guajira","Caquetá","Archipiélago de San Andrés Providencia y Santa Catalina","Sucre",
+        "Arauca","Putumayo","Vaupés","Guainía","Vichada",'Guaviare']
+depart.sort(key = str.lower)
+cco=np.arange(0,len(depart),1)
+
+lendep=[]
+lendep.insert(0,len(df.query('departamento==@depart[0]').groupby('fecha_diagnostico').count()))
+lendep.insert(1,len(df.query('departamento==@depart[1]').groupby('fecha_diagnostico').count()))
+lendep.insert(2,len(df.query('departamento==@depart[2]').groupby('fecha_diagnostico').count()))
+lendep.insert(3,len(df.query('departamento==@depart[3]').groupby('fecha_diagnostico').count()))
+lendep.insert(4,len(df.query('departamento==@depart[4]').groupby('fecha_diagnostico').count()))
+lendep.insert(5,len(df.query('departamento==@depart[5]').groupby('fecha_diagnostico').count()))
+lendep.insert(6,len(df.query('departamento==@depart[6]').groupby('fecha_diagnostico').count()))
+lendep.insert(7,len(df.query('departamento==@depart[7]').groupby('fecha_diagnostico').count()))
+lendep.insert(8,len(df.query('departamento==@depart[8]').groupby('fecha_diagnostico').count()))
+lendep.insert(9,len(df.query('departamento==@depart[9]').groupby('fecha_diagnostico').count()))
+lendep.insert(10,len(df.query('departamento==@depart[10]').groupby('fecha_diagnostico').count()))
+lendep.insert(11,len(df.query('departamento==@depart[11]').groupby('fecha_diagnostico').count()))
+lendep.insert(12,len(df.query('departamento==@depart[12]').groupby('fecha_diagnostico').count()))
+lendep.insert(13,len(df.query('departamento==@depart[13]').groupby('fecha_diagnostico').count()))
+lendep.insert(14,len(df.query('departamento==@depart[14]').groupby('fecha_diagnostico').count()))
+lendep.insert(15,len(df.query('departamento==@depart[15]').groupby('fecha_diagnostico').count()))
+lendep.insert(16,len(df.query('departamento==@depart[16]').groupby('fecha_diagnostico').count()))
+lendep.insert(17,len(df.query('departamento==@depart[17]').groupby('fecha_diagnostico').count()))
+lendep.insert(18,len(df.query('departamento==@depart[18]').groupby('fecha_diagnostico').count()))
+lendep.insert(19,len(df.query('departamento==@depart[19]').groupby('fecha_diagnostico').count()))
+lendep.insert(20,len(df.query('departamento==@depart[20]').groupby('fecha_diagnostico').count()))
+lendep.insert(21,len(df.query('departamento==@depart[21]').groupby('fecha_diagnostico').count()))
+lendep.insert(22,len(df.query('departamento==@depart[22]').groupby('fecha_diagnostico').count()))
+lendep.insert(23,len(df.query('departamento==@depart[23]').groupby('fecha_diagnostico').count()))
+lendep.insert(24,len(df.query('departamento==@depart[24]').groupby('fecha_diagnostico').count()))
+lendep.insert(25,len(df.query('departamento==@depart[25]').groupby('fecha_diagnostico').count()))
+lendep.insert(26,len(df.query('departamento==@depart[26]').groupby('fecha_diagnostico').count()))
+lendep.insert(27,len(df.query('departamento==@depart[27]').groupby('fecha_diagnostico').count()))
+lendep.insert(28,len(df.query('departamento==@depart[28]').groupby('fecha_diagnostico').count()))
+lendep.insert(29,len(df.query('departamento==@depart[29]').groupby('fecha_diagnostico').count()))
+lendep.insert(30,len(df.query('departamento==@depart[30]').groupby('fecha_diagnostico').count()))
+lendep.insert(31,len(df.query('departamento==@depart[31]').groupby('fecha_diagnostico').count()))
+lendep.insert(32,len(df.query('departamento==@depart[32]').groupby('fecha_diagnostico').count()))
+lendep.insert(33,len(df.query('departamento==@depart[33]').groupby('fecha_diagnostico').count()))
+lendep.insert(34,len(df.query('departamento==@depart[34]').groupby('fecha_diagnostico').count()))
+lendep.insert(35,len(df.query('departamento==@depart[35]').groupby('fecha_diagnostico').count()))
+lendep.insert(36,len(df.query('departamento==@depart[36]').groupby('fecha_diagnostico').count()))
+
+casos=df.iloc[:,1]
+
+casost=df_result.groupby('departamento').count()
+casostot=casost.iloc[:,0]
+
+diag=df.groupby('fecha_diagnostico').count()
+casos_d=diag.iloc[:,1]
+diagnostico=df.iloc[:,13].dropna(how='any').unique().tolist()
+diagnostico.sort()
+x=np.arange(1,len(casos_d),1)
+cd=np.arange(0,len(casos_d),1)
+d=0
+con_tot=[]
+for i in cd:
+    d=d+casos_d[i]
+    con_tot.insert(i,d)
+    
+rec=df.groupby('fecha_recuperado').count()
+casos_r=rec.iloc[:,1]
+recuperado=df.iloc[:,14].dropna(how='any').unique().tolist()
+recuperado.sort()   
+cr=np.arange(0,len(casos_r),1)
+r=0
+rec_tot=[]
+for i in cr:
+    r=r+casos_r[i]
+    rec_tot.insert(i,r)
+
+dead=df.groupby('fecha_de_muerte').count()
+casos_m=dead.iloc[:,1]
+muerto=df.iloc[:,17].dropna(how='any').unique().tolist()
+muerto.sort()  
+cm=np.arange(0,len(casos_m),1)
+m=0
+dead_tot=[]
+for i in cm:
+    m=m+casos_m[i]
+    dead_tot.insert(i,m)
+     
+diag['contagios totales']=con_tot
+
+anastasio=np.arange(0,(len(b)),1)
+
+fechasan=[]
+an_tot=[]
+deparn=[]
+anit=0
+j=0
+corte=0
+for i in anastasio: 
+    newde=depart[corte]
+    newfe=diagnostico[corte]
+    anit=anit+b[i]
+    an_tot.insert(i,anit)
+    deparn.insert(i,newde)
+    fechasan.insert(i,newfe)
+    j+=1
+    
+    if j==lendep[corte]:
+        anit=0
+        corte+=1
+        j=0
+        if corte>34:
+            corte=0
+        
+newfe=anim.index.values
+
+contag=np.array(con_tot)
+contagios=contag[-1]
+recup = np.array(rec_tot)
+recupera2 = recup[-1]
+deadpaila=np.array(dead_tot)
+muer2=deadpaila[-1]
+
+
+fig = go.Figure(go.Indicator(
+    mode = "gauge+number",
+    value = contagios,
+    title = {'text': "Contagios"},
+    domain = {'x': [0, 1], 'y': [0, 1]}
+))
+fig.show()
+
+fig = go.Figure(go.Indicator(
+    mode = "gauge+number",
+    value = recupera2,
+    title = {'text': "Recuperados"},
+    domain = {'x': [0, 1], 'y': [0, 1]}
+))
+fig.show()
+
+fig = go.Figure(go.Indicator(
+    mode = "gauge+number",
+    value = muer2,
+    title = {'text': "Fallecidos"},
+    domain = {'x': [0, 1], 'y': [0, 1]}
+))
+fig.show()
+
+fig=go.Figure(data=[go.Bar(x=depart, y=casostot)],layout_title_text='Contagios Por Cuidad')
+fig.show()
+
+fig=px.pie(df_result,values='casos', names='sexo', title='Casos Registrados Sexo')
+fig.show()
+
+fig=px.pie(df_result,values='casos', names='estado', title='Estado de los Contagiados')
+fig.show()
+
+fig=go.Figure()
+fig.add_trace(go.Scatter(y=casos_d,x=diagnostico,mode='lines',name='Contagios Por Dia'))
+fig.show()
+
+fig=go.Figure()
+fig.add_trace(go.Scatter(y=con_tot,x=diagnostico,mode='lines',name='Contagios Totales Por Dia'))
+fig.show()
+
+fig=go.Figure()
+fig.add_trace(go.Scatter(y=casos_r,x=recuperado,mode='lines',name='Recuperados por dia'))
+fig.show()
+
+fig=go.Figure()
+fig.add_trace(go.Scatter(y=rec_tot,x=recuperado,mode='lines',name='Recuperados Totales por dia'))
+fig.show()
+
+fig=go.Figure()
+fig.add_trace(go.Scatter(y=casos_m,x=muerto,mode='lines',name='Fallecidos por Dia'))
+fig.show()
+
+fig=go.Figure()
+fig.add_trace(go.Scatter(y=dead_tot,x=muerto,mode='lines',name='Fallecidos Totales por dia'))
+fig.show()
+
+tresd=pd.DataFrame({'fecha diagnostico':diagnostico,'casos totales x dia':con_tot,'casos x dia':casos_d})
+fig = px.scatter_3d(tresd, x='fecha diagnostico', y='casos x dia', z='casos totales x dia', color='casos totales x dia',
+                   color_continuous_scale='electric_r')
+fig.show()
+
+tresd1 = pd.DataFrame({'fecha recuperado':recuperado,'recuperados totales x dia':rec_tot,'recuperados x dia':casos_r})
+fig = px.scatter_3d(tresd1, x='fecha recuperado', y='recuperados x dia', z='recuperados totales x dia', color='recuperados totales x dia',
+                   color_continuous_scale='greens')
+fig.show()
+
+tresd2 = pd.DataFrame({'fecha muerte':muerto,'muertes totales x dia':dead_tot,'muertes x dia':casos_m})
+tresd2
+fig = px.scatter_3d(tresd2, x='fecha muerte', y='muertes x dia', z='muertes totales x dia', color='muertes totales x dia',
+                   color_continuous_scale='hot_r')
+fig.show()
+
+fig = px.scatter_mapbox(df_result, lat='lat', lon='lon', hover_name='departamento', color='casos_totales', 
+                        size='casos_totales',color_continuous_scale='haline', zoom=3,
+                        title= 'Covid-19 en Colombia')
+
+fig.update_layout(mapbox_style="open-street-map")
+
+fig.show()
+
+tot=df.groupby('fecha_reporte_web').count()
+totfet=tot.index.values
+fe1=np.arange(0,len(lendep),1)
+fe2=np.arange(0,len(totfet),1)
+contfe=0
+feani=[]
+deani=[]
+for i in fe1:
+    for j in fe2:
+        feani.insert(contfe,totfet[j])
+        deani.insert(contfe,depart[i])
+        contfe+=1
+        
+anichi=pd.DataFrame({'departamento':deani,'fecha':feani})
+
+anichi['lat']=anichi['departamento']
+anichi['lat'].replace({'Bogotá D.C.':4.6097102,'Valle del Cauca':3.5833299,'Antioquia':6.1759100,
+                      'Cartagena D.T. y C.':10.3997202,'Huila':1.8537101,'Meta':3.9869499,
+                      'Atlántico':10.8595304,'Barranquilla D.E.':10.9685402,'Risaralda':4.8391600,
+                      'Norte de Santander':8.2377300,'Caldas':5.4478302,'Cundinamarca': 4.7163801,
+                      'Amazonas':-4.2081000,'Nariño':0.8301800,'Santa Marta D.T. y C.':11.2407904,
+                      'Tolima':4.1492400,'Magdalena':11.0070295,'Cesar':8.8170000,
+                      'Quindío':4.5294900,'Boyacá':5.5352803,'Santander':7.1253901,
+                      'Buenaventura D.E.':3.5394399,'Cauca':2.4382300,'Bolívar':9.2420197,
+                      'Córdoba':8.7479801,'Chocó':5.6918802,'Casanare':5.3377500,
+                      'La Guajira':11.5444403,'Caquetá':1.6143800,'Arauca':7.0847100,
+                      'Archipiélago de San Andrés Providencia y Santa Catalina':12.5847197,
+                      'Sucre':9.3047199,'Putumayo':1.1493300,'Vaupés':0.9723900,'Guainía':3.867,
+                      'Vichada':4.455951,'Guaviare':2.5728600},inplace=True)
+
+anichi['lon']=anichi['departamento']
+anichi['lon'].replace({'Bogotá D.C.':-74.0817490,'Valle del Cauca':-77.0000000,'Antioquia':-75.5917435,
+                      'Cartagena D.T. y C.':-75.5144424,'Huila':-76.0507126,'Meta':-73.7579727,
+                      'Atlántico':-74.7738571,'Barranquilla D.E.':-74.7813187,'Risaralda':-75.6672668,
+                      'Norte de Santander':-73.3560410,'Caldas':-74.6631088,'Cundinamarca': -74.2119522,
+                      'Amazonas':-69.9432000,'Nariño':-77.6495895,'Santa Marta D.T. y C.':-74.1990433,
+                      'Tolima':-74.8842926,'Magdalena':-74.2476501,'Cesar':-74.7170000,
+                      'Quindío':-75.6409073,'Boyacá':-73.3677826,'Santander':-73.1197968,
+                      'Buenaventura D.E.':-76.3036118,'Cauca':-76.6131592,'Bolívar':-74.7546692,
+                      'Córdoba':-75.8814316,'Chocó':-76.6583481,'Casanare':-72.3958588,
+                      'La Guajira':-72.9072189,'Caquetá':-75.6062317,'Arauca':-70.7590800,
+                      'Archipiélago de San Andrés Providencia y Santa Catalina':-81.7005615,
+                      'Sucre':-75.3977814,'Putumayo':-76.6466100,'Vaupés':-70.4063500,'Guainía':-67.917,
+                      'Vichada':-69.290771,'Guaviare':-72.6459100},inplace=True)
+
+newb=b.tolist()
+
+anichi2=pd.DataFrame({'fechas':newfe,'casos':an_tot,'casos por dia':newb})
+anichi2['fechas']=anichi2['fechas'].str.get(1)
+
+anichi=pd.concat([anichi,anichi2],axis=1)
+confe=anichi.iloc[:,4]
+
+conewfe=np.arange(0,len(feani),1)
+conteo=[]
+i=0
+cont=0
+cont2=0
+value=0
+for j in conewfe:
+    if feani[j]==confe[i]:
+        value=value+newb[i]
+        conteo.insert(cont,value)
+        if i<len(newb):
+            i+=1
+    else:
+        value=value
+        conteo.insert(cont,value)
+    cont+=1
+    cont2+=1
+    if cont2==len(totfet):
+        cont2=0
+        value=0
+        
+anichi['casos totales por dia y departamento']=conteo
+
+anichi.to_excel("anima.xlsx",sheet_name="datos")
+
+fig = px.scatter_mapbox(anichi, lat='lat', lon='lon', hover_name='departamento', color='casos totales por dia y departamento', 
+                        size='casos totales por dia y departamento',color_continuous_scale=px.colors.sequential.Blackbody_r,
+                        zoom=3,animation_frame='fecha',title= 'Crecimiento del Covid-19 en Colombia')
+
+fig.update_layout(
+    mapbox_style="white-bg",
+    mapbox_layers=[
+        {
+            "below": 'traces',
+            "sourcetype": "raster",
+            "source": [
+                "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"
+            ]
+        }
+      ])
+
+fig.show()
+
+m_3 = folium.Map(location=[4,-72], tiles='stamenterrain', zoom_start=4.5)
+mc = MarkerCluster()
+for idx, row in df_result.iterrows():
+    if not math.isnan(row['lon']) and not math.isnan(row['lat']):
+        mc.add_child(Marker([row['lat'], row['lon']]))
+m_3.add_child(mc)
+m_3
+
+m_5 = folium.Map(location=[4,-72], tiles='stamenterrain', zoom_start=5.5)
+HeatMap(data=df_result[['lat', 'lon']], radius=25).add_to(m_5)
+m_5
+
+params = params={
+        'resource_id': 'b64ba3c4-9e41-41b8-b3fd-2da21d627558', 
+        'limit': limite,
+    }
+url = 'https://datosabiertos.bogota.gov.co/api/3/action/datastore_search'
+r = requests.get(url, params=params).json()
+
+datbog = pd.DataFrame(r['result']['records'])
+datbog['casos'] = 1
+
+datbog.to_excel("databogota.xlsx",sheet_name="datos")
+tobog=datbog.groupby('Localidad de residencia').count()
+local=tobog.index.values
+casosbo=tobog.iloc[:,0]
+casosbo2=casosbo.tolist()
+
+casbo=pd.DataFrame({'Localidad':local,'Casos':casosbo2})
+
+casbo['Lon']=casbo['Localidad']
+casbo['Lon'].replace({'Barrios Unidos':-74.084,'Engativá':-74.107,'Sumapaz':-74.315,'Teusaquillo':-74.094,
+                      'La Candelaria':-74.074,'Santa Fe':-74.030,'Suba':-74.082,'Fontibón':-74.148,'Los Mártires':-74.091,
+                      'San Cristóbal':-74.088,'Usme':-74.103,'Puente Aranda':-74.123,'Usaquén':-74.031,
+                      'Fuera de Bogotá':-74.082,'Bosa':-74.192,'Ciudad Bolívar':-74.154,'Rafael Uribe Uribe':-74.116,
+                      'Kennedy':-74.157,'Chapinero':-74.047,'Tunjuelito':-74.141,'Antonio Nariño':-74.101,
+                      'Sin Dato':-74.152053},inplace=True)
+
+casbo['Lat']=casbo['Localidad']
+casbo['Lat'].replace({'Barrios Unidos':4.666,'Engativá':4.707,'Sumapaz':4.035,'Teusaquillo':4.645,'La Candelaria':4.594,
+                      'Santa Fe':4.596,'Suba':4.765,'Fontibón':4.683,'Los Mártires':4.603,'San Cristóbal':4.546,
+                      'Usme':4.477,'Puente Aranda':4.615,'Usaquén':4.749,'Fuera de Bogotá':4.610,'Bosa':4.631,
+                      'Ciudad Bolívar':4.507,'Rafael Uribe Uribe':4.565,'Kennedy':4.627,'Chapinero':4.657,
+                      'Tunjuelito':4.588,'Antonio Nariño':4.549,'Sin Dato':4.653376},inplace=True)
+
+fig=px.pie(datbog,values='casos', names='Localidad de residencia', title='Casos por localidad en Bogotá D.C.')
+fig.show()
+
+fig = px.sunburst(datbog, path=['Sexo', 'Localidad de residencia'], values='casos',title='Contagios por localidad y sexo')
+fig.show()
+
+casosd=datbog.iloc[:,9]
+esta2=datbog.iloc[:,8]
+
+donut=pd.DataFrame({'Casos':casosd,'Estado':esta2})
+donut["Estado"].replace({'Fallecido No aplica No causa Directa':'Fallecido','Moderado                                                                                                                                                                                                    ':'Moderado'},inplace=True)
+
+fig=px.pie(donut,values='Casos', names='Estado', hole=.4, title='Estado de los Contagiados en Bogotá')
+fig.show()
+
+ubi=datbog.iloc[:,6]
+
+donutcho=pd.DataFrame({'Ubicacion':ubi,'Casos':casosd})
+donutcho['Ubicacion'].replace({'Casa                                                                                                                                                                                                    ':'Casa','Fallecido No aplica No causa Directa':'Fallecido'},inplace=True)
+
+fig=px.pie(donutcho,values='Casos', names='Ubicacion',hole=.4 ,title='Ubicacion de los Contagiados')
+fig.show()
+
+fig = px.scatter_mapbox(casbo, lat='Lat', lon='Lon', hover_name='Localidad', color='Casos', 
+                        size='Casos',color_continuous_scale='cividis', zoom=9,
+                        title= 'Covid-19 en Bogota')
+
+fig.update_layout(mapbox_style="open-street-map")
+
+fig.show()
